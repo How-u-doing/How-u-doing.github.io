@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+	.center {
+		width: 60%;
+		margin: auto;
+	}
+	
+	body{
+		font-family: Consolas, monaco, monospace;
+	}
+
+</style>
+
+<head>
+	<meta charset="utf-8">
+        
+	
+	
+	<link rel="stylesheet" href="styles/vs2015.css">
+	<script src="highlight.pack.js"></script>	
+	<script>hljs.initHighlightingOnLoad();</script>
+	
+</head>
+<body>
+
+<div class="center">
+
+<p>C++ Code</p>
+<pre><code class="cpp">
+#include &lt;iostream>
+
+using namespace std;
+
+class Point {
+public:
+	Point(int a = 0, int b = 0) : x(a), y(b) {
+		//note that only in VS 2019, when we want print address, it won't print Ox, while Unix-like does print
+		cout << "Constructor called --> P(" << x << ',' << y << ")" << "\t with address --> 0x" << this << "\n\n";
+	}
+	Point(const Point& A) : x(A.x), y(A.y) {
+		cout << "Copy constructor called --> P(" << x << ',' << y << ")" << "\t with address --> 0x" << this << "\n\n";
+	}
+	// try to umcomment move constructor/assignment
+	/*Point(Point&& A) noexcept :x{ 0 }, y{ 0 } {
+		swap(x, A.x); swap(y, A.y);
+		cout << "Move constructor called --> P(" << x << ',' << y << ")" << "\t with address --> 0x" << this << "\n\n";
+	}
+	Point& operator=(Point&& A)noexcept {
+		if (this == &A) return *this;
+		swap(x, A.x); swap(y, A.y);
+		cout << "Move assignment called --> P(" << x << ',' << y << ")" << "\t with address --> 0x" << this << "\n\n";
+		return *this;
+	}*/
+
+	Point& operator=(const Point& A) {
+		x = A.x; y = A.y;
+		cout << "Copy assignment called --> P(" << x << ',' << y << ")" << "\t with address --> 0x" << this << "\n\n";
+		return *this;
+	}
+
+	~Point() { cout << "Destructor called --> P(" << x << ',' << y << ")" << "\t with address --> 0x" << this << "\n\n"; }
+
+	friend Point operator+(const Point& A, const Point& B) {
+		// try them respectively and see what's going on
+		//return Point(A.x + B.x, A.y + B.y);
+		Point C(A.x + B.x, A.y + B.y);
+		return C;
+	}
+
+	friend ostream& operator<<(ostream& os, const Point& A) {
+		os << "(" << A.x << ',' << A.y << ")";
+		return os;
+	}
+
+private:
+	int x, y;
+};
+
+
+
+int main()
+{
+	Point A(1, 2);
+	Point B(8, 9);
+	// try them respectively and see what's going on
+	Point C;
+	C = A + B;
+	//Point C = A + B;
+	cout << C << "\n\n";
+	return 0;
+}
+
+
+</code></pre>
+
+
+<br>
+<p>MATLAB Code</p>
+<pre><code class="MATLAB">
+% Cubic Spline with clamped boundary
+function s=CubicSpline(xq,x,y,dya,dyb)
+% xq: query points, specified as a vector, to be evaluated
+% x,y: vector x consists of n sample points, and vector y is its corresponding function values
+% dya,dyb: the derivatives f'(x_0) and f'(x_N) respectively
+% s: the spline function values at those query points
+k=length(xq);        % the no. of query points
+n=length(x);         % the no. of sample points
+if n~=length(y)
+    error('mismatch between x and y\n')
+end
+if nargin<=3
+    dya=0;  dyb=0;    
+end
+
+A=2*eye(n);         % coefficient matrix
+A(1,2)=1;   A(n,n-1)=1;
+d=zeros(n,1);       % right-hand side vector
+d(1)=6/(x(2)-x(1))*((y(2)-y(1))/(x(2)-x(1))-dya);       % 6f[x_1,x_1,x_2]
+d(n)=6/(x(n)-x(n-1))*(dyb-(y(n)-y(n-1))/(x(n)-x(n-1))); % 6f[x_(n-1),x_n,x_n]
+for i=2:n-1
+    h0=x(i)-x(i-1);
+    h1=x(i+1)-x(i);
+    A(i,i+1)=h1/(h1+h0);        % lambda_i
+    A(i,i-1)=1-A(i,i+1);        % mu_i    
+    d(i)=6*((y(i+1)-y(i))/h1-(y(i)-y(i-1))/h0)/(h0+h1); % 2nd divided difference * 6
+end
+M=solveTridiag(A,d);            % solve A*M=d
+
+% construct cubic spline s(x) and compute those query points
+s=zeros(k,1);
+for i=2:n
+    for j=1:k
+        if xq(j)<=x(i) && xq(j)>=x(i-1)            
+            x0=xq(j)-x(i-1);
+            x1=x(i)-xq(j);
+            h=x(i)-x(i-1);
+            s(j)=(M(i-1)*x1^3+M(i)*x0^3)/6/h+(y(i-1)*x1+y(i)*x0)/h-...
+                (M(i-1)*x1+M(i)*x0)*h/6;
+        end
+    end    
+end
+
+end
+
+
+</code></pre>
+
+
+<br>
+<p>Python Code</p>
+<pre><code class="python">
+import nltk
+import pandas as pd
+import matplotlib
+import matplotlib.pyplot as plt
+
+# 3-by-3 combinations
+
+product_name = "microwave"
+#product_name = "pacifier"
+#product_name = "hair_dryer"
+file_name = product_name + ".tsv"
+
+df = pd.read_csv(file_name, sep="\t")
+scope_list = list(range(0,len(df.review_body),2))   ## use half data
+#scope_list = list(range(0,len(df)))                ## use all data
+body = df.review_body[scope_list]
+
+#vine_type = "YN"
+vine_type = "NY"
+#vine_type = "NN"
+
+if vine_type == "YN":
+    vine_type_scope_list = [i for i in scope_list if df.vine[i]=='Y' and df.verified_purchase[i]=='N']
+    vine_type_str = "vine members (YN)"
+elif vine_type == "NY":
+    vine_type_scope_list = [i for i in scope_list if df.vine[i]=='N' and df.verified_purchase[i]=='Y']
+    vine_type_str = "none vine members verified (NY)"
+else:
+    vine_type_scope_list = [i for i in scope_list if df.vine[i]=='N' and df.verified_purchase[i]=='N']
+    vine_type_str = "none vine members unverified (NN)"
+    
+
+print(product_name.title() + ' review body words of ' + vine_type_str + ' statistics (every 2 count 1)\n')
+
+all_words = []
+dump = [',','.','...','!','$','?','(',')',"'",'"',';',':','/','<','br','>',
+      '+','&','#','@','-','=','~','`','*','%','^','{','}','[',']','|','\\']
+dump_words = ['the','it','a','and','is','of','for','to','on','in','or','i']
+dump += dump_words
+print('Dumped words in list dump\n',dump,'\n\n')
+
+for i in vine_type_scope_list:
+    # may use ps.stem()
+    if not pd.isna(body[i]):        
+        all_words += [w.lower() for w in nltk.word_tokenize(body[i]) if w.lower() not in dump]
+
+#sorted_words = sorted(all_words,key=all_words.count,reverse=True)
+
+freq_words = nltk.FreqDist(all_words)
+freq_words_50 = freq_words.most_common(50)
+print('Top 50 frequent words (excepting words in dump)\n',freq_words_50,'\n\n')
+plt.figure(1)
+plt.title('Top 20 frequent words of ' + vine_type_str + ' in ' + product_name + ' review bodies')
+freq_words.plot(20, cumulative=False)   # close the plot window to continue execution
+
+# use tag to find only adj
+tagged_words = nltk.pos_tag(all_words)
+adj_words = [word for (word, tag) in tagged_words if tag == 'JJ']
+freq_adj = nltk.FreqDist(adj_words)
+freq_adj_50 = freq_adj.most_common(50)
+print('Top 50 frequent adjectives (excepting words in dump)\n',freq_adj_50)
+plt.figure(2)
+plt.title('Top 20 frequent adjectives of ' + vine_type_str + ' in ' + product_name + ' review bodies')
+freq_adj.plot(20, cumulative=False)
+
+
+</code></pre>
+
+</div>
+
+</body>
+</html>
